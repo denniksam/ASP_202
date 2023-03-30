@@ -1,0 +1,101 @@
+﻿@{
+    ViewData["Title"] = "Razor";
+    Random rnd = new();
+}
+
+<div class="text-center">
+    <h1 class="display-4">Основи Razor</h1>
+</div>
+
+<p>
+    Razor - синтаксис для включення до складу HTML команд C#.
+    Базується на вживанні ключового символа &commat;, через що
+    сам символ у HTML слід замінювати на html-сутність <b>&amp;commat;</b>
+</p>
+
+<p>
+    Code blocks: &commat; { C# code }<br/>
+    У розмітці не відображається.
+</p>
+@{
+    int x = rnd.Next(1, 20);
+    String str = "The String";
+}
+<p>
+    Expression (вирази) - інструкції, які мають результат (щось повертають).
+    Неявний (implicit) друк -  <b>&commat;Expression</b><br/>
+    Наприклад: &commat;x = @x <br/>
+    Обмеження: символ &commat; не вважається активним у літерах, які сприймаються
+    як електронна пошта: str-length@str.Length <br/>
+    Вираз вважається завершеним якщо далі слідує тег, при цьому Generic також
+    сприймається як тег: &commat;List&lt;int> <br/>
+    Також вираз може бути обмеженим пробілами або іншими роздільними знаками
+    x - 3 = @x - 3
+</p>
+<p>
+    Явний синтаксис для виразів: &commat;( Вираз )<br />
+    str-length@str.Length &rarr; str-length@(str.Length) <br />
+    x - 3 = @x - 3  &rarr; x - 3 = @(x - 3)
+</p>
+<p>
+    Умовна верстка: &commat;if, &commat;switch<br/>
+    У блоках цих операторів можна використовувати як інструкції C#, так
+    і розмітку. За розмітку вважається те, що у тегах. Інше - інструкції.
+    Якщо треба зазначити, що розмітка іде без тегів, то слід додати
+    префікс &commat;:
+</p>
+<p>
+    @if(x < 10)
+    {
+        int y = 20;
+        <b>Цей блок буде зверстано якщо x &lt; 10</b>
+        y++;
+        <i>При цьому y = @y </i>
+        @:кінець блоку
+    }
+    else
+    {
+        int y = 30;
+        <b>Цей блок буде зверстано якщо x &ge; 10</b>
+        y--;
+        <i>При цьому y = @y </i>
+        @:кінець блоку
+    }
+</p>
+<p>
+    @switch (x)
+    {
+        case 1:
+            <i> case x = 1</i>
+            break;
+        case 10:
+            <i> case x = 10</i>
+            break;
+        default:
+            <i> default: x neither 1 nor 10</i>
+            break;
+    }
+</p>
+<p>
+    Циклові оператори &commat;for, &commat;foreach, тощо<br />
+    те ж саме - можливість "змішування" коду та розмітки
+</p>
+<div>
+    @for (int i = 0; i < @x; i++)
+    {
+        <p>
+            @(i+1). Позиція з і = @i
+        </p>
+    }
+</div>
+@{
+    int[] arr = { 9, 7, 5, 3, 1 };
+}
+<ul>
+    @foreach(int item in arr)
+    {
+        String txt = $"item value = {item}";
+        <li>@txt</li>
+    }
+</ul>
+
