@@ -59,8 +59,7 @@ namespace ASP_202.Controllers
                     new() { Name = "Планшет",    Price = 8800   },
                     new() { Name = "Наліпка :)", Price = 1.50   }
                 }
-            };
-            
+            };           
 
             return View(model);
         }
