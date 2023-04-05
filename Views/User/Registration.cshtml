@@ -1,4 +1,6 @@
-﻿@{
+﻿@using ASP_202.Models.User
+@model UserRegistrationModel
+@{
     ViewData["Title"] = "Реєстрація";
 }
 
@@ -6,3 +8,104 @@
     <h1 class="display-4">Реєстрація нового користувача</h1>
 </div>
 
+<form method="post" asp-controller="User" asp-action="RegisterUser">
+    <div class="form-group">
+        <label asp-for="Login">Логін</label>
+        <input asp-for="Login" type="text"
+               class="form-control" placeholder="Виберіть собі логін" />        
+    </div>
+    <div class="form-group">
+        <label asp-for="Password">Пароль</label>
+        <input asp-for="Password" type="password" 
+               class="form-control" placeholder="Придумайте пароль" />
+    </div>
+    <div class="form-group">
+        <label asp-for="RepeatPassword">Підтвердіть пароль</label>
+        <input asp-for="RepeatPassword" type="password"
+               class="form-control" placeholder="Повторіть пароль" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" type="email" 
+               class="form-control" placeholder="Введіть свій E-mail">
+        <small id="emailHelp" class="form-text text-muted">Без вашої згоди E-mail не буде видно для інших користувачів.</small>
+    </div>
+    <div class="form-group">
+        <label asp-for="RealName">Реальне ім'я</label>
+        <input asp-for="RealName" type="text"
+               class="form-control" placeholder="Введіть ваше реальне ім'я" />
+        <small id="emailHelp" class="form-text text-muted">Без вашої згоди ім'я не буде видно для інших користувачів.</small>
+    </div>
+    <br/>
+    <div class="form-check">
+        <input asp-for="IsAgree" class="form-check-input">
+        <label asp-for="IsAgree" 
+               class="form-check-label">Даю згоду дотримуватись правил сайту</label>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Реєстрація</button>
+</form>
+
+@if (ViewData["validationResult"] is UserValidationModel validationResult)
+{
+    <p>
+        Результати валідації:<br/>
+        @validationResult.LoginMessage<br />
+    </p>
+    <p>
+        Д.З. Знайти у шаблонах bootstrap засоби виведення помилки поля форми
+        Реалізувати виведення (якщо є) повідомлення про порожний логін
+        Додати перевірку на порожність реального імені.
+        ** та інших полів форми
+    </p>
+}
+
+<hr/>
+<h2>Робота з формами</h2>
+<p>
+    У ASP ідея моделей, як описів комплексних даних, закладається в основу
+    організації як самих форм, так і контроллерів, які ці дані обробляють.
+    При створенні форми, як правило, все починається з моделі.
+</p>
+<p>
+    Узгодження передачі даних відбувається за іменами: слід дотримуватись
+    однакових імен у формі та у контроллері. Для уникнення помилок украй
+    рекомендується вживати тег-помічники з атрибутом asp-for.
+    Значення атрибуту відповідає полям (властивостям) моделі, покращують
+    контроль за помилками. Більш того, цей атрибут автоматично генерує
+    id та name для елемента, а також підбирає тип input згідно з типом 
+    даних поля моделі. Плюс для полів, які не передають окремі значення,
+    наприклад, невідмічені checkbox, створюються приховані поля для 
+    передачі значення за замовчанням.
+</p>
+<p>
+    Методи контроллерів можут отримувати дані форм та відразу переносити їх
+    у об'єкти-моделі (точніше, створювати об'єкти та заповнювати їх поля).
+    Зв'язування здійснюється <u>за збігом імен</u> у класі-моделі та параметрах
+    запиту. Це півищує важливість правильного встановлення імен полів форм,
+    тобто рекомендує вживати засоби asp-for. Також бажано перевіряти <b>усі</b>
+    поля моделі, навіть якщо видно, що деякі проходять нормально.
+</p>
+<hr/>
+<h2>Про форми HTML</h2>
+<p>
+    Форми - це засіб HTML/браузера для відправлення даних. Можна сказати,
+    що форма є розширенням поняття "посилання", яке не тільки переходить
+    за новою адресою, а ще й передає на неї певні дані. Аналогічно з посиланнями
+    відправлення форми (перехід за посиланням) руйнує сторінку, і нова збирається
+    з відповіді сервера.
+</p>
+<p>
+    Як форма передає дані?<br/>
+    Особливості передачі даних встановлюються атрибутами тега &lt;form>:<br />
+    <b>method</b> - get (default) | post - методи запиту (згідно з 
+        <a href="https://www.rfc-editor.org/rfc/rfc7231#page-22">стандартом</a>)<br />
+    <b>enctype</b> - application/x-www-form-urlencoded (default) | multipart/form-data <br />
+    application/x-www-form-urlencoded == name1=val1&name2=val2&....<br />
+    multipart/form-data == зобразити важко - використовується для передачі файлів<br />
+    get - запити GET не повинні мати тіло, відповідно дані передаються через URL
+     у частині query/params<br />
+    post - дані вкладені у тіло запиту. Для того щоб їх переглянути треба відкрити
+     консоль браузера, вибрати інструмент "Network", вибрати головний запит (за
+     назвою сторінки) та відкрити таб "Payload"<br />
+</p>
