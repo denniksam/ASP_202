@@ -8,4 +8,5 @@ public class UserValidationModel
     public String EmailMessage          { get; set; } = null!;
     public String RealNameMessage       { get; set; } = null!;
     public String IsAgreeMessage        { get; set; } = null!;
+    public String AvatarMessage         { get; set; } = null!;
 }

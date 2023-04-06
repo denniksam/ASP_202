@@ -2,63 +2,113 @@
 @model UserRegistrationModel
 @{
     ViewData["Title"] = "Реєстрація";
+    var validationResult = ViewData["validationResult"] as UserValidationModel;
 }
 
 <div class="text-center">
     <h1 class="display-4">Реєстрація нового користувача</h1>
 </div>
 
-<form method="post" asp-controller="User" asp-action="RegisterUser">
+<form method="post" asp-controller="User" asp-action="RegisterUser" enctype="multipart/form-data">
     <div class="form-group">
         <label asp-for="Login">Логін</label>
+        <!-- 
+            за результатом перевірки кожен input має додати клас is-valid / is-invalid
+            validationResult is null - нічого (не було перевірки)
+            validationResult.LoginMessage is null - is-valid
+            else - is-invalid
+        -->
         <input asp-for="Login" type="text"
-               class="form-control" placeholder="Виберіть собі логін" />        
+               class="form-control @(validationResult is null ? "" : (validationResult.LoginMessage is null ? "is-valid" : "is-invalid") ) "
+               placeholder="Виберіть собі логін" />
+        <!--
+            А також додаємо блок з класом invalid-feedback / valid-feedback (опціонально)
+            теж за наявності результатів перевірки
+        -->
+        @if (validationResult?.LoginMessage is not null)
+        {
+            <div class="invalid-feedback">
+                @validationResult.LoginMessage
+            </div>
+        }
     </div>
     <div class="form-group">
         <label asp-for="Password">Пароль</label>
         <input asp-for="Password" type="password" 
-               class="form-control" placeholder="Придумайте пароль" />
+               class="form-control @(validationResult is null ? "" : (validationResult.PasswordMessage is null ? "is-valid" : "is-invalid") ) "
+               placeholder="Придумайте пароль" />
+        @if (validationResult?.PasswordMessage is not null)
+        {
+            <div class="invalid-feedback">
+                @validationResult.PasswordMessage
+            </div>
+        }
     </div>
     <div class="form-group">
         <label asp-for="RepeatPassword">Підтвердіть пароль</label>
         <input asp-for="RepeatPassword" type="password"
-               class="form-control" placeholder="Повторіть пароль" />
+               class="form-control @(validationResult is null ? "" : (validationResult.RepeatPasswordMessage is null ? "is-valid" : "is-invalid") ) "
+               placeholder="Повторіть пароль" />
+        @if (validationResult?.RepeatPasswordMessage is not null)
+        {
+            <div class="invalid-feedback">
+                @validationResult.RepeatPasswordMessage
+            </div>
+        }
     </div>
     <div class="form-group">
         <label asp-for="Email">Email</label>
         <input asp-for="Email" type="email" 
-               class="form-control" placeholder="Введіть свій E-mail">
-        <small id="emailHelp" class="form-text text-muted">Без вашої згоди E-mail не буде видно для інших користувачів.</small>
+               class="form-control @(validationResult is null ? "" : (validationResult.EmailMessage is null ? "is-valid" : "is-invalid") ) "
+               placeholder="Введіть свій E-mail">
+        @if (validationResult?.EmailMessage is not null)
+        {
+            <div class="invalid-feedback">
+                @validationResult.EmailMessage
+            </div>
+        }
+        else
+        {
+            <small class="form-text text-muted">Без вашої згоди E-mail не буде видно для інших користувачів.</small>
+        }        
     </div>
     <div class="form-group">
         <label asp-for="RealName">Реальне ім'я</label>
         <input asp-for="RealName" type="text"
-               class="form-control" placeholder="Введіть ваше реальне ім'я" />
-        <small id="emailHelp" class="form-text text-muted">Без вашої згоди ім'я не буде видно для інших користувачів.</small>
+               class="form-control @(validationResult is null ? "" : (validationResult.RealNameMessage is null ? "is-valid" : "is-invalid") ) "
+               placeholder="Введіть ваше реальне ім'я" />
+        @if (validationResult?.RealNameMessage is not null)
+        {
+            <div class="invalid-feedback">
+                @validationResult.RealNameMessage
+            </div>
+        }
+        else
+        {
+            <small class="form-text text-muted">Без вашої згоди ім'я не буде видно для інших користувачів.</small>
+        }
+    </div>
+    <div class="mb-3">
+        <label asp-for="Avatar"
+               class="form-label">Виберіть файл для аватарки</label>
+        <input asp-for="Avatar"
+               class="form-control" type="file" />
     </div>
     <br/>
     <div class="form-check">
         <input asp-for="IsAgree" class="form-check-input">
         <label asp-for="IsAgree" 
-               class="form-check-label">Даю згоду дотримуватись правил сайту</label>
+               class="form-check-label @(validationResult is null ? "" : (validationResult.IsAgreeMessage is null ? "is-valid" : "is-invalid") )">Даю згоду дотримуватись правил сайту</label>
+        @if (validationResult?.IsAgreeMessage is not null)
+        {
+        <div class="invalid-feedback">
+            @validationResult.IsAgreeMessage
+        </div>
+        }
     </div>
     <br />
     <button type="submit" class="btn btn-primary">Реєстрація</button>
 </form>
-
-@if (ViewData["validationResult"] is UserValidationModel validationResult)
-{
-    <p>
-        Результати валідації:<br/>
-        @validationResult.LoginMessage<br />
-    </p>
-    <p>
-        Д.З. Знайти у шаблонах bootstrap засоби виведення помилки поля форми
-        Реалізувати виведення (якщо є) повідомлення про порожний логін
-        Додати перевірку на порожність реального імені.
-        ** та інших полів форми
-    </p>
-}
 
 <hr/>
 <h2>Робота з формами</h2>
@@ -108,4 +158,10 @@
     post - дані вкладені у тіло запиту. Для того щоб їх переглянути треба відкрити
      консоль браузера, вибрати інструмент "Network", вибрати головний запит (за
      назвою сторінки) та відкрити таб "Payload"<br />
+</p>
+<hr/>
+<h2>Передача файлів</h2>
+<p>
+    З боку HTML: у формі має бути поле типу "file" та enctype форми 
+    <b>обов'язково</b> повинен мати значення "multipart/form-data"
 </p>

@@ -1,0 +1,17 @@
+﻿@using ASP_202.Models.User
+@model UserRegistrationModel
+@{
+    ViewData["Title"] = "Вітаємо";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Реєстрація пройшла успішно</h1>
+</div>
+<p>
+    Шановний <strong>@Model.RealName</strong>!
+</p>
+<p>
+    Вітаємо Вас на нашому сайті. Для входу на сайт скористайтесь
+    обраним паролем.
+</p>
+<img src="/avatars/@(Model.Avatar.FileName)" alt="А могла б бути аватарка" />
