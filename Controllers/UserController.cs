@@ -1,4 +1,5 @@
 ﻿using ASP_202.Models.User;
+using ASP_202.Services.Hash;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 
@@ -7,6 +8,15 @@ namespace ASP_202.Controllers
     // [Route("User")]
     public class UserController : Controller
     {
+        private readonly IHashService _hashService;
+        private readonly ILogger<UserController> _logger;
+
+        public UserController(IHashService hashService, ILogger<UserController> logger)
+        {
+            _hashService = hashService;
+            _logger = logger;
+        }
+
         public IActionResult Index()
         {
             return View();
@@ -98,12 +108,21 @@ namespace ASP_202.Controllers
             {
                 // завантажуємо файл, якщо він є. Відсутність файлу - припустима
                 // схема: перевіямо файл що він є картинкою, переносимо у /avatars
-                // TODO: Перевірити розмір файлу (більше 1кБ)
+                // TODO: Перевірити розмір файлу (більше 1кБ), видати повідомлення якщо це не так
                 // TODO: Перевірити тип (Avatar.ContentType) - має бути "image/***"
                 // TODO: Перевірити на наявність такого файлу у папці "wwwroot/avatars/"
 
-                string path = "wwwroot/avatars/" + userRegistrationModel.Avatar.FileName;
-
+                // Відокремлюємо розширення файлу
+                String ext = Path.GetExtension(userRegistrationModel.Avatar.FileName);
+                // хешуємо ім'я файлу
+                String hash = (_hashService.Hash(
+                    userRegistrationModel.Avatar.FileName + Guid.NewGuid()))[..16];
+                // формуємо нове ім'я
+                string path = "wwwroot/avatars/" + hash + ext;
+                /* Д.З. Реалізувати додаткову перевірку на те, що файл із згенерованим
+                 * ім'ям вже є у папці "wwwroot/avatars/". Зробити перевірку циклічною
+                 * на випадок повторного збігу.
+                 */
                 using (var fileStream = new FileStream(path, FileMode.Create))
                 {
                     userRegistrationModel.Avatar.CopyTo(fileStream);

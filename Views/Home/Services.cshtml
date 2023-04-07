@@ -1,0 +1,78 @@
+﻿@using ASP_202.Services
+@inject TimeService timeService
+@inject DateService dateService
+@inject DtService   dtService
+@{
+    ViewData["Title"] = "Сервіси";
+}
+<div class="text-center">
+    <h1 class="display-4">Служби (сервіси) ASP</h1>
+</div>
+<p>
+    Служби - це "постачальники послуг", залежності у розумінні інверсії управління,
+    які впроваджуються (інжектуються) у інші класи (об'єкти).
+</p>
+<p>
+    Інверсія управління, як реалізація, - спосіб делегування процесів створення
+    об'єктів (інстансів) до певного "центру керування" - інжектора. 
+    Інжектор налагоджується при старті програми (у Program.cs/Startup.cs)
+    за допомогою <code>builder.Services</code>
+</p>
+<p>
+    Класи та інтерфейси служб прийнято зберігати окремо, у папці <code>Services</code>.
+    <br/>
+    - Створюємо класи TimeService, DateService<br />
+    - Реєструємо їх як сервіси (з різними областями існування - Scopes)
+    (<code>
+        builder.Services.AddSingleton&lt;TimeService>();<br/>
+        builder.Services.AddTransient&lt;DateService>();<br />
+        builder.Services.AddScoped&lt;DtService>();
+    </code>)<br />
+    - Після реєстрації служба потрапляє до інжектора і може бути впроваджена
+      (інжектована) у інші класи. Рекомендований спосіб впровадження - через
+    конструктор класу (див. HomeController)<br />
+    Дані від служби timeService: <i>@ViewData["now"]</i><br />
+    Дані від служби dateService: <i>@ViewData["date_now"]</i><br />
+    Дані від служби dtService:   <i>@ViewData["dt_now"]</i><br />
+</p>
+<p>
+    Службу можна інжектувати і в представлення, для цього на початку сторінки
+    додається інструкція <code>&commat;inject TimeService timeService</code><br />
+    Дані від служби timeService: <i>@timeService.GetTime()</i><br />
+    Дані від служби dateService: <i>@dateService.GetDate()</i><br />
+    Дані від служби dtService:   <i>@dtService.GetNow()</i><br />
+</p>
+<p>
+    Хеш-код служби timeService(cont):  <i>@ViewData["hashCode"]</i>
+        <b>Хеші однакові і не змінюються при оновленні</b><br />
+    Хеш-код служби timeService(view):  <i>@timeService.GetHashCode()</i>
+        <b>сторінки чи новій вкладки / вікна / браузера</b><br />
+
+    Хеш-код служби dateService(cont):  <i>@ViewData["date_hashCode"]</i>
+        <b>Хеші різні навіть у межах одного запиту</b><br />
+    Хеш-код служби dateService(view):  <i>@dateService.GetHashCode()</i>
+        <b>кожна інжекція - новий об'єкт</b><br />
+
+    Хеш-код служби dtService(cont):  <i>@ViewData["dt_hashCode"]</i>
+        <b>Хеші однакові, але змінюються при оновленні</b><br />
+    Хеш-код служби dtService(view):  <i>@dtService.GetHashCode()</i>
+        <b>нові об'єкти створюють з новими запитами</b><br />
+</p>
+<hr/>
+<p>
+    За вимогами SOLID (D - dependency inversion) залежності не рекомендується
+    впроваджувати через прямі посилання на об'єкти, а через інтерфейси, які
+    дозволять змінювати реалізації, тобто замінювати старі об'єкти на нові
+    без суттєвих змін коду.
+</p>
+<p>
+    Описується інтерфейс, наприклад, <code>IHashService</code>, описується
+    його реалізація, наприклад, <code>Md5HashService</code>. Далі реєстрація
+    відбувається з двопараметричним методом:<br/>
+    <code>builder.Services.AddSingleton&lt;IHashService, Md5HashService>();</code>
+    <br/>
+    Інжекція відбувається за тою ж схемою, але у якості типу даних зазначається
+    інтерфейс.
+    <br />
+    Демо: хеш("123") = <b>@ViewData["hash"]</b>
+</p>
