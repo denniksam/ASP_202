@@ -1,4 +1,6 @@
-﻿using ASP_202.Models.User;
+﻿using ASP_202.Data;
+using ASP_202.Data.Entity;
+using ASP_202.Models.User;
 using ASP_202.Services.Hash;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
@@ -10,11 +12,13 @@ namespace ASP_202.Controllers
     {
         private readonly IHashService _hashService;
         private readonly ILogger<UserController> _logger;
+        private readonly DataContext _dataContext;
 
-        public UserController(IHashService hashService, ILogger<UserController> logger)
+        public UserController(IHashService hashService, ILogger<UserController> logger, DataContext dataContext)
         {
             _hashService = hashService;
             _logger = logger;
+            _dataContext = dataContext;
         }
 
         public IActionResult Index()
@@ -132,6 +136,31 @@ namespace ASP_202.Controllers
 
             if (isModelValid)
             {
+                // формуємо сутність для БД
+                String salt = _hashService.Hash(Guid.NewGuid().ToString());
+                User user = new()
+                {
+                    Id = Guid.NewGuid(),
+                    Login = userRegistrationModel.Login,
+                    PasswordSalt = salt,
+                    PasswordHash = _hashService.Hash(salt + userRegistrationModel.Password),
+                    Avatar = null,
+                    Email = userRegistrationModel.Email,
+                    RealName = userRegistrationModel.RealName,
+                    RegisterDt = DateTime.Now,
+                    LastEnterDt = null,
+                    EmailCode = null,
+                };
+                /* Д.З. Передати ім'я файлу-аватара (без шляху, тільки файл)
+                 * у об'єкт user.
+                 * Згенерувати 6-літерний випадковий код підтвердження пошти,
+                 * включити його у той самий об'єкт user
+                 */
+
+                // додаємо її до контексту
+                _dataContext.Users.Add(user);
+                _dataContext.SaveChanges();
+
                 // показуємо сторінку з підтвердженням реєстрації
                 return View(userRegistrationModel);
             }

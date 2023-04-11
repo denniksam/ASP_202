@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Контекст";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Утворення контексту даних</h1>
+</div>
+<p>
+    Рядок підключення: розміщуємо у файлі "appsettings.json" додаткову секцію<br/>
+    <code>
+        "ConnectionStrings": {<br />
+        "MainDb": "Data Source=(LocalDB)\\MSSQLLocalDB;Initial Catalog=ef202asp;Integrated Security=True"<br />
+        }<br />
+    </code><br />
+    Зауваження: база даних ef202asp може не існувати, її створить EFCore.
+    Також можна зазначити підключення до наявної БД, у т.ч. віддаленої.
+    Також дозволяється зазначити декілька рядків підключення
+</p>
+<p>
+    Додаємо пакети NuGet
+</p>
+<ul>
+    <li>Microsoft.EntityFrameworkCore</li>
+    <li>Microsoft.EntityFrameworkCore.Tools</li>
+    <li>Microsoft.EntityFrameworkCore.SqlServer або інший постачальник</li>
+</ul>
+<p>
+    Створюємо папку у корені проєкту Data, у ній папку Entity.
+    У папці Entity створюємо клас User, у папці Data - клас DataContext
+</p>
+<p>
+    На відміну від ADO, проєкти ASP керуються інвертором управління,
+    тому створення об'єктів делегується цьому модулю. Відповідно, 
+    у контексті даних слід оголосити конструктор із параметром<br/>
+    <code>
+        public DataContext(DbContextOptions options) : base(options)<br />
+        {        }<br />
+    </code>
+    Тіло залишити порожним
+</p>
+<p>
+    Використовуємо команди побудови та застосування міграцій.
+    Або через РМ-консоль, або через термінал (приклад з терміналу):<br />
+    dotnet tool install --global dotnet-ef<br />
+    dotnet ef migrations add Initial<br/>
+    dotnet ef database update
+</p>
+<p>
+    Далі інжектуємо контекст даних (за типом DataContext) у необхідні
+    точки.
+</p>
+<p>
+    Кількість користувачів у БД: @ViewData["UsersCount"]
+</p>

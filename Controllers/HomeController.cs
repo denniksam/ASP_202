@@ -1,4 +1,5 @@
-﻿using ASP_202.Models;
+﻿using ASP_202.Data;
+using ASP_202.Models;
 using ASP_202.Services;
 using ASP_202.Services.Hash;
 using Microsoft.AspNetCore.Mvc;
@@ -13,18 +14,26 @@ namespace ASP_202.Controllers
         private readonly DateService  _dateService;
         private readonly DtService    _dtService;
         private readonly IHashService _hashService;
+        private readonly DataContext  _dataContext;
 
         public HomeController(ILogger<HomeController> logger,
-                              TimeService  timeService,
-                              DateService  dateService,
-                              DtService    dtService,
-                              IHashService hashService)
+                              TimeService timeService,
+                              DateService dateService,
+                              DtService dtService,
+                              IHashService hashService,
+                              DataContext dataContext)
         {
-            _logger      = logger;
+            _logger = logger;
             _timeService = timeService;
             _dateService = dateService;
-            _dtService   = dtService;
+            _dtService = dtService;
             _hashService = hashService;
+            _dataContext = dataContext;
+        }
+        public ViewResult Context()
+        {
+            ViewData["UsersCount"] = _dataContext.Users.Count();
+            return View();
         }
 
         public IActionResult Index()
