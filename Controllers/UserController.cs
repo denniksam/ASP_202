@@ -2,6 +2,8 @@
 using ASP_202.Data.Entity;
 using ASP_202.Models.User;
 using ASP_202.Services.Hash;
+using ASP_202.Services.Kdf;
+using ASP_202.Services.Random;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 
@@ -13,12 +15,16 @@ namespace ASP_202.Controllers
         private readonly IHashService _hashService;
         private readonly ILogger<UserController> _logger;
         private readonly DataContext _dataContext;
+        private readonly IRandomService _randomService;
+        private readonly IKdfService _kdfService;
 
-        public UserController(IHashService hashService, ILogger<UserController> logger, DataContext dataContext)
+        public UserController(IHashService hashService, ILogger<UserController> logger, DataContext dataContext, IRandomService randomService, IKdfService kdfService)
         {
             _hashService = hashService;
             _logger = logger;
             _dataContext = dataContext;
+            _randomService = randomService;
+            _kdfService = kdfService;
         }
 
         public IActionResult Index()
@@ -108,6 +114,7 @@ namespace ASP_202.Controllers
             }
             #endregion
             #region Avatar Uploading
+            String avatarFilename = null!;
             if(userRegistrationModel.Avatar is not null)
             {
                 // завантажуємо файл, якщо він є. Відсутність файлу - припустима
@@ -122,7 +129,8 @@ namespace ASP_202.Controllers
                 String hash = (_hashService.Hash(
                     userRegistrationModel.Avatar.FileName + Guid.NewGuid()))[..16];
                 // формуємо нове ім'я
-                string path = "wwwroot/avatars/" + hash + ext;
+                avatarFilename = hash + ext;
+                string path = "wwwroot/avatars/" + avatarFilename;
                 /* Д.З. Реалізувати додаткову перевірку на те, що файл із згенерованим
                  * ім'ям вже є у папці "wwwroot/avatars/". Зробити перевірку циклічною
                  * на випадок повторного збігу.
@@ -131,25 +139,33 @@ namespace ASP_202.Controllers
                 {
                     userRegistrationModel.Avatar.CopyTo(fileStream);
                 }
+                ViewData["avatarFilename"] = avatarFilename;
+                /* Д.З. Додати до сервісу RandomService метод формування
+                 * випадкового імені файлу (заданої довжини) - без розширення.
+                 * Перелік символів для імені файлу - безпечні символи
+                 * для імен (тільки lower case, літери, цифри, "_-=", тощо)
+                 * Замінити алгоритм формування імені для файлу аватара
+                 * на використання створеного методу у сервісі.
+                 */
             }
             #endregion
 
             if (isModelValid)
             {
                 // формуємо сутність для БД
-                String salt = _hashService.Hash(Guid.NewGuid().ToString());
+                String salt = _randomService.RandomString(8);
                 User user = new()
                 {
                     Id = Guid.NewGuid(),
                     Login = userRegistrationModel.Login,
                     PasswordSalt = salt,
-                    PasswordHash = _hashService.Hash(salt + userRegistrationModel.Password),
-                    Avatar = null,
+                    PasswordHash = _kdfService.GetDerivedKey(userRegistrationModel.Password, salt),
+                    Avatar = avatarFilename,
                     Email = userRegistrationModel.Email,
                     RealName = userRegistrationModel.RealName,
                     RegisterDt = DateTime.Now,
                     LastEnterDt = null,
-                    EmailCode = null,
+                    EmailCode = _randomService.ConfirmCode(6),
                 };
                 /* Д.З. Передати ім'я файлу-аватара (без шляху, тільки файл)
                  * у об'єкт user.
