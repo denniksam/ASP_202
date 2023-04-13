@@ -5,6 +5,7 @@ using ASP_202.Services.Hash;
 using ASP_202.Services.Kdf;
 using ASP_202.Services.Random;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using System.Text.RegularExpressions;
 
 namespace ASP_202.Controllers
@@ -187,6 +188,37 @@ namespace ASP_202.Controllers
                 // спосіб перейти на представлення, що не збігається з назвою методу
                 return View("Registration");
             }            
+        }
+        
+        [HttpPost]   // метод доступний тільки POST - запитом
+        public String AuthUser()
+        {
+            // Альтернативний спосіб дістатись параметрів форми (окрім моделі)
+            StringValues loginValues = Request.Form["user-login"];
+            if(loginValues.Count == 0)
+            {
+                return "No login";
+            }
+            String login = loginValues[0] ?? "";
+
+            StringValues passwordValues = Request.Form["user-password"];
+            if (passwordValues.Count == 0)
+            {
+                return "No password";
+            }
+            String password = passwordValues[0] ?? "";
+
+            User? user = _dataContext.Users.Where(u => u.Login == login).FirstOrDefault();
+            if (user is not null)   // знайдений користувач
+            { 
+                if(user.PasswordHash == _kdfService.GetDerivedKey(password, user.PasswordSalt))
+                {
+                    HttpContext.Session.SetString("authUserId", user.Id.ToString());
+                    return $"OK";
+                }
+            }
+
+            return $"Автентифікацію віхилено";
         }
     }
 }

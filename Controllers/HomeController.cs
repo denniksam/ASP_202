@@ -30,14 +30,25 @@ namespace ASP_202.Controllers
             _hashService = hashService;
             _dataContext = dataContext;
         }
+        public ViewResult Sessions(String? number)
+        {
+            _logger.LogInformation("number: " + number);
+            if(number is not null)
+            {
+                HttpContext.Session.SetString("number", number);
+            }
+            ViewData["number"] = HttpContext.Session.GetString("number");
+
+            return View();
+        }
         public ViewResult Context()
         {
             ViewData["UsersCount"] = _dataContext.Users.Count();
             return View();
         }
-
         public IActionResult Index()
         {
+            ViewData["authUser"] = HttpContext.Session.GetString("authUserId");
             return View();
         }
         public IActionResult Intro()
