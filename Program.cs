@@ -1,4 +1,5 @@
 using ASP_202.Data;
+using ASP_202.Middleware;
 using ASP_202.Services;
 using ASP_202.Services.Hash;
 using ASP_202.Services.Kdf;
@@ -62,6 +63,9 @@ app.UseAuthorization();
 
 // Включення НТТР-сесій
 app.UseSession();
+
+// Підключаємо власні Middleware
+app.UseMiddleware<SessionAuthMiddleware>();
 
 app.MapControllerRoute(
     name: "default",

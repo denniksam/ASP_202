@@ -41,6 +41,10 @@ namespace ASP_202.Controllers
 
             return View();
         }
+        public ViewResult Middleware()
+        {
+            return View();
+        } 
         public ViewResult Context()
         {
             ViewData["UsersCount"] = _dataContext.Users.Count();
@@ -48,7 +52,6 @@ namespace ASP_202.Controllers
         }
         public IActionResult Index()
         {
-            ViewData["authUser"] = HttpContext.Session.GetString("authUserId");
             return View();
         }
         public IActionResult Intro()
