@@ -220,5 +220,36 @@ namespace ASP_202.Controllers
 
             return $"Автентифікацію віхилено";
         }
+
+        public RedirectToActionResult Logout()
+        {
+            HttpContext.Session.Remove("authUserId");
+            return RedirectToAction("Index", "Home");
+            /* Redirect - як це працює?
+             * Browser               Server
+             * GET /home -----------> Home-Index->View()
+             *   page    <----------- 200 OK <!doctype html>...
+             *   
+             *            GET /Logout
+             * <a logout> ----------> User-Logout->Redirect(...)
+             *            <---------- 302 Redirect /Home/Index
+             * GET /Home/Index -----> Home-Index->View()
+             *   page    <----------- 200 OK <!doctype html>... 
+             *   
+             * Це зовнішній редірект, мається на увазі те, що браузер змінює
+             * URL та повторює запит
+             * Існують внутрішні редіректи (forward), які змінюють контроллер/
+             * представлення без повідомлення браузера. У браузері залишається
+             * введений URL, а сервер за ним видає іншу сторінку.
+             */
+        }
+
+        public ViewResult Profile()
+        {
+            /* Д.З. Налагодити особисту сторінку користувача (Profile)
+             * Реалізувати виведення аватарки користувача
+             */
+            return View();
+        }
     }
 }
