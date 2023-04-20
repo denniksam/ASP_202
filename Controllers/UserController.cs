@@ -6,6 +6,7 @@ using ASP_202.Services.Kdf;
 using ASP_202.Services.Random;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 
 namespace ASP_202.Controllers
@@ -51,6 +52,12 @@ namespace ASP_202.Controllers
             if (String.IsNullOrEmpty(userRegistrationModel.Login))
             {
                 validationResult.LoginMessage = "Логін не може бути порожним";
+                isModelValid = false;
+            }
+            if(_dataContext.Users.Any(u => u.Login.ToLower() == userRegistrationModel.Login.ToLower()))
+            {
+                validationResult.LoginMessage = 
+                    $"Логін '{userRegistrationModel.Login}' вже у вжитку";
                 isModelValid = false;
             }
             #endregion
@@ -244,12 +251,58 @@ namespace ASP_202.Controllers
              */
         }
 
-        public ViewResult Profile()
+        public IActionResult Profile( [FromRoute] String id )
         {
-            /* Д.З. Налагодити особисту сторінку користувача (Profile)
-             * Реалізувати виведення аватарки користувача
+            // _logger.LogInformation(id);
+            Data.Entity.User? user = _dataContext.Users.FirstOrDefault(u => u.Login == id);
+            if(user is not null)  // Є користувач із запитаним Login
+            {
+                Models.User.ProfileModel model = new(user);
+                if(String.IsNullOrEmpty(model.Avatar))
+                {
+                    model.Avatar = "no-avatar.png";
+                }
+                // перевіряємо, чи є автентифікований користувач і чи це його логін
+                // HttpContext.User - закладено (або ні) в AuthMiddleware
+                if (HttpContext.User.Identity is not null
+                 && HttpContext.User.Identity.IsAuthenticated)
+                {
+                    // користувач автентифікований
+                    String userLogin =  // логін автентифікованого користувача
+                        HttpContext.User.Claims
+                            .First(claim => claim.Type == ClaimTypes.NameIdentifier)
+                            .Value;
+
+                    if (model.Login == userLogin)
+                    {
+                        model.IsPersonal = true;
+                    }
+                }
+                    
+                return View(model);
+            }
+            else
+            {
+                return NotFound();
+            }
+            
+            /* ТЗ до сторінки користувача
+             * 1. Чи буде ця сторінка доступна для інших користувачів?
+             * Так, але відображення персональних даних може бути обмежене
+             * 
+             * 2. Як будуть формуватись посилання (URL) на цю сторінку?
+             *     /User/Profile/??????
+             *   а) Id
+             *   б) Login
+             * Вибираємо Login, це тягне за собою
+             *  - логін має бути унікальним                                v
+             *  - логін має бути URL-безпечним (без спецсимволів)          TODO
+             * 
+             * Д.З. Реалізувати умовне відображення для електронної пошти
+             * на персональній сторінці (Profile)
+             * в залежності від того, які налаштування IsEmailPublic
+             * у відповідного користувача
              */
-            return View();
         }
     }
 }

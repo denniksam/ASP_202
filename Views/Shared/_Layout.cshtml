@@ -50,7 +50,7 @@
                         .Value;
                 if (String.IsNullOrEmpty(userAvatar)) userAvatar = "no-avatar.png";
 
-                <a asp-controller="User" asp-action="Profile">
+                <a asp-controller="User" asp-action="Profile" asp-route-id="@userLogin">
                     <img src="~/avatars/@(userAvatar)"
                          alt="Ava"
                          style="max-width:40px; max-height:40px; border-radius:50%"
