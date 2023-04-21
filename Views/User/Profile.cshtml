@@ -77,7 +77,9 @@
                             <div class="col-sm-8 text-secondary">
                                 @if (Model.IsRealNamePublic || Model.IsPersonal)
                                 {
-                                    <span id="realname">@Model.RealName</span>
+                                    <span id="realname" class="p-2">
+                                        @Model.RealName
+                                    </span>
                                 }
                                 else
                                 {
@@ -87,7 +89,9 @@
                             <div class="col-sm-1">
                                 @if (Model.IsPersonal)
                                 {
-                                    <img src="~/img/icons/pencil.svg" data-ref-field="realname" />
+                                    <img src="~/img/icons/pencil.svg" 
+                                         data-ref-field="realname"
+                                         role="button" />
                                 }
                             </div>
                         </div>
@@ -97,12 +101,23 @@
                                 <h6 class="mb-0">Email</h6>
                             </div>
                             <div class="col-sm-8 text-secondary">
-                                fip@jukmuh.al
+                                @if (Model.IsEmailPublic || Model.IsPersonal)
+                                {
+                                    <span id="email" class="p-2">
+                                        @Model.Email
+                                    </span>
+                                }
+                                else
+                                {
+                                    <i>Приховано від загального перегляду</i>
+                                }
                             </div>
                             <div class="col-sm-1">
                                 @if (Model.IsPersonal)
                                 {
-                                    <img src="~/img/icons/pencil.svg" />
+                                    <img src="~/img/icons/pencil.svg"
+                                         data-ref-field="email"
+                                         role="button" />
                                 }
                             </div>
                         </div>
@@ -220,3 +235,46 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        for( let element of document.querySelectorAll("[data-ref-field]") ) {
+            element.addEventListener("click", editClick);
+        }
+    });
+
+    function editClick(e) {
+        const targetId = e.target.getAttribute("data-ref-field");
+        console.log(targetId);
+        const editableTarget = document.getElementById(targetId);
+        console.log(editableTarget);
+        editableTarget.setAttribute("contenteditable", "true");
+        editableTarget.focus();
+        editableTarget.onblur = finishEditing;
+        editableTarget.onkeydown = editableKeydown;
+    }
+
+    function editableKeydown(e) {
+        if(e.key=="Enter"){
+            e.preventDefault();
+            e.target.blur();
+            return false;
+        }
+    }
+
+    function finishEditing(e) {
+        const element = e.target;
+        /*
+        Д.З. Редагування персональних даних:
+        Перевіряти, чи були внесені зміни у редаговані поля при закінченні редагування.
+        Якщо змін не було, не видавати погоджень "Зберегти зміни?"
+        та не "відправляти" дані
+        ** У режимі редагування змінити кнопку "олівець" на "завершити" та обробляти
+           її натиснення
+        */
+        if( confirm("Зберегти зміни?") ) {
+            console.log("Надсилаємо: " + element.id + "=" + element.innerText);            
+        }
+        element.removeAttribute("contenteditable");
+    }
+</script>
