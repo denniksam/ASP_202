@@ -4,6 +4,7 @@ using ASP_202.Services;
 using ASP_202.Services.Hash;
 using ASP_202.Services.Kdf;
 using ASP_202.Services.Random;
+using ASP_202.Services.Validation;
 using Microsoft.EntityFrameworkCore;
 // using MySqlConnector;
 
@@ -16,6 +17,7 @@ builder.Services.AddScoped<DtService>();
 builder.Services.AddSingleton<IHashService, Md5HashService>();
 builder.Services.AddSingleton<IRandomService, RandomServiceV1>();
 builder.Services.AddSingleton<IKdfService, HashKdfService>();
+builder.Services.AddSingleton<IValidationService, ValidationServiceV1>();
 
 
 String? connectionString = builder.Configuration.GetConnectionString("MainDb");

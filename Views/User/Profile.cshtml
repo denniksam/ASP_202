@@ -245,13 +245,19 @@
 
     function editClick(e) {
         const targetId = e.target.getAttribute("data-ref-field");
-        console.log(targetId);
+        // console.log(e.timeStamp);
+        e.target.oldSrc = e.target.src;
+        e.target.src = "/img/icons/save.svg" ;
+        e.target.removeEventListener("click", editClick);
+        // console.log(targetId);
         const editableTarget = document.getElementById(targetId);
-        console.log(editableTarget);
+        // console.log(editableTarget);
         editableTarget.setAttribute("contenteditable", "true");
         editableTarget.focus();
         editableTarget.onblur = finishEditing;
         editableTarget.onkeydown = editableKeydown;
+        // зберігаємо значення, що було до початку редагування
+        editableTarget.oldContent = editableTarget.innerText;
     }
 
     function editableKeydown(e) {
@@ -264,17 +270,28 @@
 
     function finishEditing(e) {
         const element = e.target;
-        /*
-        Д.З. Редагування персональних даних:
-        Перевіряти, чи були внесені зміни у редаговані поля при закінченні редагування.
-        Якщо змін не було, не видавати погоджень "Зберегти зміни?"
-        та не "відправляти" дані
-        ** У режимі редагування змінити кнопку "олівець" на "завершити" та обробляти
-           її натиснення
-        */
-        if( confirm("Зберегти зміни?") ) {
-            console.log("Надсилаємо: " + element.id + "=" + element.innerText);            
+        // console.log(e.timeStamp);
+        if (typeof element.oldContent !== 'undefined'
+         && element.innerText !== element.oldContent 
+         && confirm("Зберегти зміни?") ) 
+        {
+            console.log("Надсилаємо: " + element.id + "=" + element.innerText);
+            window.fetch("/User/Update",
+            {
+                method:"PUT",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    field: element.id,
+                    value: element.innerText
+                })
+            }).then(r=>r.json()).then(console.log);
         }
         element.removeAttribute("contenteditable");
+        const img = document.querySelector(`[data-ref-field=${element.id}]`);
+        img.src = img.oldSrc;
+        setTimeout(() => img.addEventListener("click", editClick), 200);
+        
     }
 </script>

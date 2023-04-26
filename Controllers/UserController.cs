@@ -4,6 +4,7 @@ using ASP_202.Models.User;
 using ASP_202.Services.Hash;
 using ASP_202.Services.Kdf;
 using ASP_202.Services.Random;
+using ASP_202.Services.Validation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using System.Security.Claims;
@@ -19,14 +20,18 @@ namespace ASP_202.Controllers
         private readonly DataContext _dataContext;
         private readonly IRandomService _randomService;
         private readonly IKdfService _kdfService;
+        private readonly IValidationService _validationService;
+        private readonly IConfiguration _configuration;
 
-        public UserController(IHashService hashService, ILogger<UserController> logger, DataContext dataContext, IRandomService randomService, IKdfService kdfService)
+        public UserController(IHashService hashService, ILogger<UserController> logger, DataContext dataContext, IRandomService randomService, IKdfService kdfService, IValidationService validationService, IConfiguration configuration)
         {
             _hashService = hashService;
             _logger = logger;
             _dataContext = dataContext;
             _randomService = randomService;
             _kdfService = kdfService;
+            _validationService = validationService;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -49,9 +54,9 @@ namespace ASP_202.Controllers
             byte minPasswordLength = 3;
 
             #region Login Validation
-            if (String.IsNullOrEmpty(userRegistrationModel.Login))
+            if (!_validationService.Validate(userRegistrationModel.Login, ValidationTerms.Login))
             {
-                validationResult.LoginMessage = "Логін не може бути порожним";
+                validationResult.LoginMessage = "Логін не відповідає шаблону";
                 isModelValid = false;
             }
             if(_dataContext.Users.Any(u => u.Login.ToLower() == userRegistrationModel.Login.ToLower()))
@@ -62,40 +67,33 @@ namespace ASP_202.Controllers
             }
             #endregion
             #region Password / Repeat Validation
-            if (String.IsNullOrEmpty(userRegistrationModel.Password))
+            if (!_validationService.Validate(userRegistrationModel.Password, ValidationTerms.NotEmpty))
             {
                 validationResult.PasswordMessage = "Пароль не може бути порожним";
                 isModelValid = false;
             }
-            else
+            else if (!_validationService.Validate(userRegistrationModel.Email, ValidationTerms.Passsword))
             {
-                if(userRegistrationModel.Password.Length < minPasswordLength) 
-                {
-                    validationResult.PasswordMessage = 
-                        $"Пароль закороткий, щонайменше {minPasswordLength} символи";
-                    isModelValid = false;
-                }
-                if ( ! userRegistrationModel.Password.Equals(userRegistrationModel.RepeatPassword))
-                {
-                    validationResult.RepeatPasswordMessage = "Паролі не збігаються";
-                    isModelValid = false;
-                }
+                validationResult.PasswordMessage = $"Пароль закороткий, щонайменше 3 символи";
+                isModelValid = false;
+            }
+            else if (!userRegistrationModel.Password.Equals(userRegistrationModel.RepeatPassword))
+            {
+                validationResult.RepeatPasswordMessage = "Паролі не збігаються";
+                isModelValid = false;
             }
             #endregion
             #region Email Validation
-            if (String.IsNullOrEmpty(userRegistrationModel.Email))
+            if (!_validationService.Validate(userRegistrationModel.Email, ValidationTerms.NotEmpty))
             {
                 validationResult.EmailMessage = "Email не може бути порожним";
                 isModelValid = false;
             }
-            else
+            else if (!_validationService.Validate(userRegistrationModel.Email, ValidationTerms.Email))
             {
-                String emailRegex = @"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,})+)$";
-                if (!Regex.IsMatch(userRegistrationModel.Email, emailRegex, RegexOptions.IgnoreCase))
-                {
-                    validationResult.EmailMessage = "Email не відповідає шаблону";
-                    isModelValid = false;
-                }
+                validationResult.EmailMessage = "Email не відповідає шаблону";
+                isModelValid = false;
+
             }
             #endregion
             #region RealName Validation
@@ -304,5 +302,59 @@ namespace ASP_202.Controllers
              * у відповідного користувача
              */
         }
-    }
+
+        [HttpPut]
+        public JsonResult Update( [FromBody] UserUpdateModel model )
+        {
+            /* методи контролерів ASP можут автоматично парсити JSON у моделі
+             * для цього зазначаємо атрибут [FromBody] у параметрах методу
+             */
+            if(model is null)
+            {
+                return Json(new { status = "Error", data = "No or invalid Data" });
+            }
+            if(HttpContext.User.Identity?.IsAuthenticated != true)
+            {
+                return Json(new { status = "Error", data = "Unauthenticated" });
+            }
+            User? user = null;
+            try
+            {
+                user = _dataContext.Users.Find( Guid.Parse(
+                    HttpContext.User.Claims
+                    .First(claim => claim.Type == ClaimTypes.Sid).Value
+                ) ) ;
+            }
+            catch { }
+            if(user is null)
+            {
+                return Json(new { status = "Error", data = "Unauthorizated" });
+            }
+            switch (model.Field)
+            {
+                case "realname":
+                    if(!_validationService.Validate(model.Value, ValidationTerms.RealName))
+                    {
+                        return Json(new { status = "Error", 
+                            data = $"Validation failed for field '{model.Field}', value = '{model.Value}'" });
+                    }
+                    user.RealName = model.Value;
+                    _dataContext.SaveChanges();
+                    return Json(new { status = "OK", data = $"Name changed to '{user.RealName}'" });
+                default:
+
+                    return Json(new { status = "Error", data = $"Unknown field '{model.Field}'" }); ;
+            }
+        }
+        /* Зміна даних в особистому профілі:
+         * З боку "фронтенд" провести аналіз відповіді бекенду
+         *  - якщо "ОК", то змінити усі місця, у яких відображаються змінені дані
+         *     (ім'я дублюється під аватаром)
+         *  - якщо помилка, то відати повідомлення (alert) про помилку
+         *     і повернути значення до збереженого вигляду (відмінити зміни)
+         * Також додати реакцію на кнопку ESC - відміняти зміни, повертати до
+         *  збереженого стану.
+         * ** Реалізувати зміни E-mail
+         */
+    }    
 }

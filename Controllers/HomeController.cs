@@ -15,13 +15,15 @@ namespace ASP_202.Controllers
         private readonly DtService    _dtService;
         private readonly IHashService _hashService;
         private readonly DataContext  _dataContext;
+        private readonly IConfiguration _configuration;
 
         public HomeController(ILogger<HomeController> logger,
                               TimeService timeService,
                               DateService dateService,
                               DtService dtService,
                               IHashService hashService,
-                              DataContext dataContext)
+                              DataContext dataContext,
+                              IConfiguration configuration)
         {
             _logger = logger;
             _timeService = timeService;
@@ -29,6 +31,7 @@ namespace ASP_202.Controllers
             _dtService = dtService;
             _hashService = hashService;
             _dataContext = dataContext;
+            _configuration = configuration;
         }
         public ViewResult Sessions(String? number)
         {
@@ -52,6 +55,17 @@ namespace ASP_202.Controllers
         }
         public IActionResult Index()
         {
+            return View();
+        }
+        public ViewResult EmailConfirmation()
+        {
+            ViewData["config"] = _configuration["Smtp:Gmail:Host"];
+            /* Зареєструвати Гугл-акаунт, встановити двоетапну автентифікацію
+             * Отримати пароль застосунку та включити його у конфігурацію проєкту
+             * Вилучити конфігурацію з репозиторію, створити зразок
+             * Отримати при старті усі дані з конфігурації, вивести їх (окрім пароля)
+             * на сторінку для контролю правильності.
+             */
             return View();
         }
         public IActionResult Intro()
