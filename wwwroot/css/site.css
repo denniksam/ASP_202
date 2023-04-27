@@ -74,3 +74,14 @@ body {
 .shadow-none {
     box-shadow: none !important;
 }
+
+/* https://codepen.io/sosuke/pen/Pjoqqp, https://stackoverflow.com/questions/22252472/ */
+.color-filter-candy {
+    filter: brightness(0) saturate(100%)   invert(14%) sepia(70%) saturate(4701%) hue-rotate(357deg) brightness(98%) contrast(105%);
+}
+.color-filter-parakeet {
+    filter: brightness(0) saturate(100%)   invert(51%) sepia(43%) saturate(2826%) hue-rotate(106deg) brightness(97%) contrast(98%);
+}
+.color-filter-pear {
+    filter: brightness(0) saturate(100%)   invert(62%) sepia(43%) saturate(679%) hue-rotate(47deg) brightness(94%) contrast(89%);
+}

@@ -6,6 +6,7 @@
         public String Login { get; set; }
         public String RealName { get; set; }
         public String Email { get; set; }
+        public String? EmailCode { get; set; }
         public String? Avatar { get; set; }
         public DateTime RegisterDt { get; set; }
         public DateTime? LastEnterDt { get; set; }

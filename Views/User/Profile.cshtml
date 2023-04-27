@@ -14,7 +14,7 @@
 <div class="container">
     <div class="main-body">
 
-        <!-- Breadcrumb -->
+        <!-- Breadcrumb 
         <nav aria-label="breadcrumb" class="main-breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.html">Home</a></li>
@@ -22,7 +22,7 @@
                 <li class="breadcrumb-item active" aria-current="page">User Profile</li>
             </ol>
         </nav>
-        <!-- /Breadcrumb -->
+        /Breadcrumb -->
 
         <div class="row gutters-sm">
             <div class="col-md-4 mb-3">
@@ -98,7 +98,18 @@
                         <hr>
                         <div class="row">
                             <div class="col-sm-3">
-                                <h6 class="mb-0">Email</h6>
+                                <h6 class="mb-0">Email
+                                    @if (Model.IsPersonal)
+                                        if (Model.EmailCode is null)
+                                        {
+                                            <img src="~/img/icons/person-check.svg" class="mb-1 color-filter-parakeet" title="Пошта підтверджена" alt="+" />
+                                        }
+                                        else
+                                        {
+                                            <img data-bs-toggle="modal" data-bs-target="#confirmModal" role="button"
+                                                 src="~/img/icons/person-slash.svg" class="mb-1 color-filter-candy" title="Пошта не підтверджена" alt="-" />
+                                        }
+                                </h6>
                             </div>
                             <div class="col-sm-8 text-secondary">
                                 @if (Model.IsEmailPublic || Model.IsPersonal)
@@ -236,11 +247,39 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Введіть код з Email-листа</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="confirm-code-addon">Код:</span>
+                    <input type="text" class="form-control" 
+                           id="confirm-code-input"
+                           placeholder="Код з електронного листа" 
+                           aria-describedby="confirm-code-addon">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відміна</button>
+                <button type="button" class="btn btn-primary" id="confirm-code-button">Підтвердити</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         for( let element of document.querySelectorAll("[data-ref-field]") ) {
             element.addEventListener("click", editClick);
         }
+        const confirmCodeButton = document.getElementById("confirm-code-button");
+        if (!confirmCodeButton) console.error("confirm-code-button not found");
+        else confirmCodeButton.addEventListener("click", confirmCodeButtonClick);
     });
 
     function editClick(e) {
@@ -293,5 +332,33 @@
         img.src = img.oldSrc;
         setTimeout(() => img.addEventListener("click", editClick), 200);
         
+    }
+
+    function confirmCodeButtonClick() {
+        const confirmCodeInput = document.getElementById("confirm-code-input");
+        if (!confirmCodeInput) throw "confirm-code-button not found";
+        const code = confirmCodeInput.value;
+        if(code.length === 0) {
+            alert("Код не може бути порожним");
+            return;
+        }
+        window.fetch("/User/ConfirmEmail", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                code: code,
+            })
+        }).then(r => r.json()).then(r => {
+
+            console.log(r);return;
+
+            if (r.success) {
+                window.location.reload();
+            } else {
+                alert('Wrong code');
+            }
+        });
     }
 </script>

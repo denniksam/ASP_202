@@ -1,6 +1,7 @@
 ﻿using ASP_202.Data;
 using ASP_202.Data.Entity;
 using ASP_202.Models.User;
+using ASP_202.Services.Email;
 using ASP_202.Services.Hash;
 using ASP_202.Services.Kdf;
 using ASP_202.Services.Random;
@@ -22,8 +23,9 @@ namespace ASP_202.Controllers
         private readonly IKdfService _kdfService;
         private readonly IValidationService _validationService;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
-        public UserController(IHashService hashService, ILogger<UserController> logger, DataContext dataContext, IRandomService randomService, IKdfService kdfService, IValidationService validationService, IConfiguration configuration)
+        public UserController(IHashService hashService, ILogger<UserController> logger, DataContext dataContext, IRandomService randomService, IKdfService kdfService, IValidationService validationService, IConfiguration configuration, IEmailService emailService)
         {
             _hashService = hashService;
             _logger = logger;
@@ -32,6 +34,7 @@ namespace ASP_202.Controllers
             _kdfService = kdfService;
             _validationService = validationService;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public IActionResult Index()
@@ -183,6 +186,22 @@ namespace ASP_202.Controllers
                 _dataContext.Users.Add(user);
                 _dataContext.SaveChanges();
 
+                // надсилаємо код підтвердження пошти
+                try
+                {
+                    _emailService.Send("confirm_email", new Models.Email.ConfirmEmailModel()
+                    {
+                        Email = user.Email,
+                        EmailCode = user.EmailCode,
+                        RealName = user.RealName,
+                        ConfirmUrl = "#"
+                    });
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogError("_emailService error '{ex}'", ex.Message);
+                }
+
                 // показуємо сторінку з підтвердженням реєстрації
                 return View(userRegistrationModel);
             }
@@ -247,6 +266,12 @@ namespace ASP_202.Controllers
              * представлення без повідомлення браузера. У браузері залишається
              * введений URL, а сервер за ним видає іншу сторінку.
              */
+        }
+
+        [HttpPost]
+        public JsonResult ConfirmEmail([FromBody] String code)
+        {
+            return Json(new { code });
         }
 
         public IActionResult Profile( [FromRoute] String id )

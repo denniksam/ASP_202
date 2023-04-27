@@ -1,6 +1,7 @@
 using ASP_202.Data;
 using ASP_202.Middleware;
 using ASP_202.Services;
+using ASP_202.Services.Email;
 using ASP_202.Services.Hash;
 using ASP_202.Services.Kdf;
 using ASP_202.Services.Random;
@@ -18,6 +19,7 @@ builder.Services.AddSingleton<IHashService, Md5HashService>();
 builder.Services.AddSingleton<IRandomService, RandomServiceV1>();
 builder.Services.AddSingleton<IKdfService, HashKdfService>();
 builder.Services.AddSingleton<IValidationService, ValidationServiceV1>();
+builder.Services.AddSingleton<IEmailService, GmailService>();
 
 
 String? connectionString = builder.Configuration.GetConnectionString("MainDb");
