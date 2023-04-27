@@ -1,5 +1,6 @@
 ﻿using ASP_202.Data;
 using ASP_202.Data.Entity;
+using ASP_202.Models;
 using ASP_202.Models.User;
 using ASP_202.Services.Email;
 using ASP_202.Services.Hash;
@@ -271,7 +272,54 @@ namespace ASP_202.Controllers
         [HttpPost]
         public JsonResult ConfirmEmail([FromBody] String code)
         {
-            return Json(new { code });
+            StatusDataModel model = new();
+
+            if(String.IsNullOrEmpty(code))
+            {
+                model.Status = "400";
+                model.Data = "Missing required param: code";
+            }
+            else if(HttpContext.User.Identity?.IsAuthenticated != true)
+            {
+                model.Status = "401";
+                model.Data = "Unathenticated";
+            }
+            else
+            {
+                User? user = null;
+                try
+                {
+                    user = _dataContext.Users.Find(Guid.Parse(
+                        HttpContext.User.Claims
+                        .First(claim => claim.Type == ClaimTypes.Sid).Value
+                    ));
+                }
+                catch { }
+                if (user is null)
+                {
+                    model.Status = "403";
+                    model.Data = "Unathorized";
+                }
+                else if(user.EmailCode is null)
+                {
+                    model.Status = "208";
+                    model.Data = "Already confirmed";
+                }
+                else if(user.EmailCode != code)
+                {
+                    model.Status = "406";
+                    model.Data = "Code Not Accepted";
+                }
+                else
+                {
+                    user.EmailCode = null;
+                    _dataContext.SaveChanges();
+                    model.Status = "200";
+                    model.Data = "OK";
+                }
+            }
+
+            return Json(model);
         }
 
         public IActionResult Profile( [FromRoute] String id )

@@ -347,17 +347,13 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                code: code,
-            })
+            body: JSON.stringify( code )
         }).then(r => r.json()).then(r => {
-
-            console.log(r);return;
-
-            if (r.success) {
+            // console.log(r);return;
+            if (r.status == "200") {
                 window.location.reload();
             } else {
-                alert('Wrong code');
+                alert(r.data);
             }
         });
     }
