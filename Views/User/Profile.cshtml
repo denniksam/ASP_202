@@ -265,6 +265,7 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-warning mx-2" id="resend-code-button">Надіслати код повторно</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Відміна</button>
                 <button type="button" class="btn btn-primary" id="confirm-code-button">Підтвердити</button>
             </div>
@@ -280,6 +281,10 @@
         const confirmCodeButton = document.getElementById("confirm-code-button");
         if (!confirmCodeButton) console.error("confirm-code-button not found");
         else confirmCodeButton.addEventListener("click", confirmCodeButtonClick);
+
+        const resendCodeButton = document.getElementById("resend-code-button");
+        if (!resendCodeButton) console.error("resend-code-button not found");
+        else resendCodeButton.addEventListener("click", resendCodeButtonClick);
     });
 
     function editClick(e) {
@@ -357,4 +362,21 @@
             }
         });
     }
+
+    function resendCodeButtonClick() {
+        window.fetch("/User/ResendEmailCode", {
+            method: "PATCH"
+        }).then(r => r.text()).then(t => {
+            console.log(t);
+            if(t == "OK") {
+                alert("Пошту надіслано");
+            }
+            else{
+                alert(t);
+            }
+        });
+    }
+    /* Д.З. Реалізувати відправлення листа підтвердження пошти
+       при зміні пошти з особистого кабінету
+    */
 </script>
