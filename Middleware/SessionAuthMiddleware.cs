@@ -63,7 +63,7 @@ namespace ASP_202.Middleware
                 }
             }
 
-            logger.LogInformation("SessionAuthMiddleware works");
+            // logger.LogInformation("SessionAuthMiddleware works");
 
             await _next(context);  // виклик наступної ланки
         }

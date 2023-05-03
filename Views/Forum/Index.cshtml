@@ -1,0 +1,47 @@
+﻿@model ASP_202.Models.Forum.ForumIndexModel
+@{
+    ViewData["Title"] = "Форум";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Форум</h1>
+</div>
+
+@foreach(var Section in Model.Sections)
+{
+    <p>@Section.Title</p>
+}
+
+@if(Model.UserCanCreate)
+{
+    <div class="row">
+        <div class="col col-6">
+            <h5 class="modal-title" id="authModalLabel">Створити новий розділ</h5>
+            @if (Model.CreateMessage is not null)
+            {
+                <div class="alert alert-@(Model.IsMessagePositive == true ? "success" : "danger" )" role="alert">
+                    @Model.CreateMessage
+                </div>
+            }
+            <form asp-controller="Forum" asp-action="CreateSection" method="post">
+                <div class="form-group">
+                <label for="section-title">Назва</label>
+                    <input type="text" class="form-control"
+                        id="section-title" name="section-title"
+                        value="@(Model.FormModel is null?"":Model.FormModel.Title)"
+                            placeholder="Назва розділу" />
+                </div>
+                <div class="form-group">
+                <label for="section-description" class="form-label">Опис</label>
+                <textarea class="form-control" id="section-description" rows="3"
+                            name="section-description"
+                              placeholder="Опис нового розділу">@(Model.FormModel is null ? "" : Model.FormModel.Description)</textarea>
+                </div>
+                <button type="submit" class="btn btn-light my-3">Створити</button>
+            </form>
+        </div>
+    </div>
+}
+
+Д.З. Реалізувати надсилання форми створення нового розділу
+Крок 1 "зворотний звязок" - повернути ті самі дані, що відправлені формою
