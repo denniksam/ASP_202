@@ -3,7 +3,7 @@
     public class ForumIndexModel
     {
         public Boolean UserCanCreate { get; set; }
-        public List<Data.Entity.Section> Sections { get; set; } = null!;
+        public List<ForumSectionModel> Sections { get; set; } = null!;
 
         // Дані від форми додавання розділу
         public String? CreateMessage { get; set; }

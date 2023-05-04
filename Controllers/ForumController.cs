@@ -2,6 +2,7 @@
 using ASP_202.Models.Forum;
 using ASP_202.Services.Validation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace ASP_202.Controllers
@@ -19,13 +20,33 @@ namespace ASP_202.Controllers
             _validationService = validationService;
         }
 
+        private int counter;
+        private int Counter { get =>  counter++; set { counter = value; } } 
         public IActionResult Index()
         {
+            Counter = 0;                
             ForumIndexModel model = new()
             {
                 UserCanCreate = HttpContext.User.Identity?.IsAuthenticated == true,
-                Sections = _dataContext.Sections.ToList(),
+                Sections = _dataContext.Sections
+                    .Include(s => s.Author)
+                    .OrderBy(s => s.CreatedDt)
+                    .AsEnumerable()
+                    .Select(s => new ForumSectionModel()
+                    {
+                        Title = s.Title,
+                        Description = s.Description,
+                        Logo = $"/img/logos/section{Counter}.png",
+                        CreatedDtString = DateTime.Today == s.CreatedDt.Date
+                            ? "Сьогодні " + s.CreatedDt.ToString("HH:mm")
+                            : s.CreatedDt.ToString("dd.MM.yyyy HH:mm"),
+
+                        AuthorName = s.Author.RealName,
+                        AuthorAvatar = $"/avatars/{s.Author.Avatar}"
+                    })
+                    .ToList(),
             };
+
             if (HttpContext.Session.GetString("CreateMessage") is String message)
             {
                 model.CreateMessage = message;

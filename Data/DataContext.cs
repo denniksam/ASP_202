@@ -24,7 +24,10 @@ namespace ASP_202.Data
             modelBuilder.Entity<Entity.Rate>()
                 .HasKey(nameof(Entity.Rate.ItemId), nameof(Entity.Rate.UserId));
 
-
+            modelBuilder.Entity<Entity.Section>()
+                .HasOne(s => s.Author)
+                .WithMany()
+                .HasForeignKey(s => s.AuthorId);
         }
     }
 }
