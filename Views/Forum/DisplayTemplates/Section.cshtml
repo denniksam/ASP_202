@@ -15,7 +15,7 @@
                 Розпочато: @Model.CreatedDtString
                 <img style="max-width:50px; max-height:50px" src="@Model.AuthorAvatar"/> 
                 @Model.AuthorName
-                <a href="#!">Переглянути</a>
+                <a asp-action="Sections" asp-route-id="@Model.UrlIdString" >Переглянути</a>
             </div>
         </div>
     </div>

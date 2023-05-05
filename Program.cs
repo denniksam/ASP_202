@@ -6,7 +6,12 @@ using ASP_202.Services.Hash;
 using ASP_202.Services.Kdf;
 using ASP_202.Services.Random;
 using ASP_202.Services.Validation;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 // using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,6 +62,37 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.Use(async (context, next) =>
+{
+    await next();
+    if (context.Response.StatusCode == 404)
+    {
+        context.Request.Path = "/Home/Page404";
+        await next();
+        /*var viewResult = new ViewResult
+        {
+            ViewName = "Home/Index",
+        };
+        
+        viewResult.ViewData = new ViewDataDictionary(
+            new EmptyModelMetadataProvider(),
+            new ModelStateDictionary())
+        {
+            Model = null!   //your model
+        };
+
+
+        var executor = context.RequestServices
+            .GetRequiredService<IActionResultExecutor<ViewResult>>();
+        var routeData = context.GetRouteData() ?? new RouteData();
+        var actionContext = new ActionContext(context, routeData,
+            new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
+
+        await executor.ExecuteAsync(actionContext, viewResult);
+        */
+    }
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

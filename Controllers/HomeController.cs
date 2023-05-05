@@ -47,6 +47,10 @@ namespace ASP_202.Controllers
         public ViewResult Middleware()
         {
             return View();
+        }  
+        public ViewResult Page404()
+        {
+            return View();
         } 
         public ViewResult Context()
         {
