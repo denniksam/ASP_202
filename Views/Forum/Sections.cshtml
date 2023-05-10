@@ -7,11 +7,9 @@
     <h1 class="display-4">Розділ</h1>
 </div>
 
-@ViewData["id"]
-
 @foreach(var Theme in Model.Themes)
 {
-    <p>@Theme.Title, @Theme.Description</p>
+   @Html.DisplayFor(m => Theme, "ThemeTemplate")
 }
 
 @if (Model.UserCanCreate)

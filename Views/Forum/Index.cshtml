@@ -40,9 +40,27 @@
                             name="section-description"
                               placeholder="Опис нового розділу">@(Model.FormModel is null ? "" : Model.FormModel.Description)</textarea>
                 </div>
+
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" 
+                            type="button" 
+                            id="logoDropdown" 
+                            data-bs-toggle="dropdown" 
+                            aria-haspopup="true" aria-expanded="false">
+                        Select Logo
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="logoDropdown">
+                        @foreach (var file in new DirectoryInfo("wwwroot/img/logos").GetFiles())
+                        {
+                            <li><a class="dropdown-item" href="#">
+                                <img src="/img/logos/@file.Name" alt="@file.Name" width="30" height="30" class="mr-2">
+                                @file.Name
+                            </a></li>
+                        }
+                    </ul>
+                </div>
                 <button type="submit" class="btn btn-light my-3">Створити</button>
             </form>
         </div>
     </div>
 }
-

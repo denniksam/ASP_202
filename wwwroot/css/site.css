@@ -85,3 +85,9 @@ body {
 .color-filter-pear {
     filter: brightness(0) saturate(100%)   invert(62%) sepia(43%) saturate(679%) hue-rotate(47deg) brightness(94%) contrast(89%);
 }
+
+/* Theme template */
+.ui-w-40 {
+    max-height: 40px;
+    max-width: 40px;
+}

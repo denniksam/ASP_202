@@ -1,6 +1,7 @@
 using ASP_202.Data;
 using ASP_202.Middleware;
 using ASP_202.Services;
+using ASP_202.Services.Display;
 using ASP_202.Services.Email;
 using ASP_202.Services.Hash;
 using ASP_202.Services.Kdf;
@@ -20,11 +21,12 @@ builder.Services.AddSingleton<TimeService>();
 builder.Services.AddTransient<DateService>();
 builder.Services.AddScoped<DtService>();
 
-builder.Services.AddSingleton<IHashService, Md5HashService>();
-builder.Services.AddSingleton<IRandomService, RandomServiceV1>();
-builder.Services.AddSingleton<IKdfService, HashKdfService>();
-builder.Services.AddSingleton<IValidationService, ValidationServiceV1>();
-builder.Services.AddSingleton<IEmailService, GmailService>();
+builder.Services.AddSingleton< IHashService,       Md5HashService     >();
+builder.Services.AddSingleton< IRandomService,     RandomServiceV1    >();
+builder.Services.AddSingleton< IKdfService,        HashKdfService     >();
+builder.Services.AddSingleton< IValidationService, ValidationServiceV1>();
+builder.Services.AddSingleton< IEmailService,      GmailService       >();
+builder.Services.AddSingleton< IDisplayService,    DisplayServiceUkr  >();
 
 
 String? connectionString = builder.Configuration.GetConnectionString("MainDb");

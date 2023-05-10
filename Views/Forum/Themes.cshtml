@@ -1,0 +1,48 @@
+﻿@model ASP_202.Models.Forum.ForumThemesPageModel
+@{
+    ViewData["Title"] = "Тема";
+}
+
+<div class="text-center">
+    <h1 class="display-4">@Model.Title</h1>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @foreach(var Topic in Model.Topics)
+    {
+        @Html.DisplayFor(m => Topic, "TopicTemplate")
+    }
+</div>
+
+
+@if (Model.UserCanCreate)
+{
+    <div class="row">
+        <div class="col col-6">
+            <h5 class="modal-title" id="authModalLabel">Задати нове питання</h5>
+            @if (Model.CreateMessage is not null)
+            {
+                <div class="alert alert-@(Model.IsMessagePositive == true ? "success" : "danger" )" role="alert">
+                    @Model.CreateMessage
+                </div>
+            }
+            <form asp-controller="Forum" asp-action="CreateTopic" method="post">
+                <div class="form-group">
+                    <label for="topic-title">Заголовок питання</label>
+                    <input type="text" class="form-control"
+                           id="topic-title" name="topic-title"
+                           value="@(Model.FormModel is null?"":Model.FormModel.Title)"
+                           placeholder="Суть питання" />
+                </div>
+                <div class="form-group">
+                    <label for="topic-description" class="form-label">Текст питання</label>
+                    <textarea class="form-control" id="topic-description" rows="3"
+                              name="topic-description"
+                              placeholder="Детальне формулювання питання">@(Model.FormModel is null ? "" : Model.FormModel.Description)</textarea>
+                </div>
+                <input type="hidden" name="theme-id" value="@Model.ThemeIdString" />
+                <button type="submit" class="btn btn-light my-3">Створити</button>
+            </form>
+        </div>
+    </div>
+}
