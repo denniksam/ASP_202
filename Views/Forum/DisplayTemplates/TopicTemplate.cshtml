@@ -8,6 +8,7 @@
         <div class="card-body">
             <h5 class="card-title">@Model.Title</h5>
             <p class="card-text">@Model.Description</p>
+            <a class="float-end" asp-action="Topics" asp-route-id="@Model.UrlIdString">Детальніше</a>
         </div>
     </div>
 </div>
