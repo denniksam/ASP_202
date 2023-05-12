@@ -1,0 +1,138 @@
+﻿@{
+    ViewData["Title"] = "Web API";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Web API</h1>
+</div>
+
+<p>
+    API - Application Program Interface - інтерфейс взаємодії програми із додатками.
+    З точки зору API програма - це певний "центр", що містить дані.
+    Додаток (застосунок) - частина загального комплексу, яка взаємодіє з "центром"
+    і обмінюється з ним даними (CRUD).
+</p>
+<p>
+    Інтерфейс (у даному контексті) - "правила гри" - набір правил за якими відбувається
+    обмін даними. Приставка "Web" (Web API) стосується саме цього слова, тобто
+    визначає, що правила обміну даними - це НТТР протокол.
+</p>
+<p>
+    На відміну від взаємодії з людиною (звичайний веб), Web API передбачає взаємодію
+    "машин" - програм між собою. Відповідно, його особливості - це використання 
+    кодів, статусів, токенів та подібних машино-зрозумілих термінів.
+    НТТР протокол надає наступні можливості
+</p>
+<ul>
+    <li>Метод запиту - команда, перше "слово" запиту.
+        Є стандартні методи: GET, POST, PATCH, DELETE, CONNECT, PUT, PATCH, 
+            TRACE, HEAD, OPTIONS
+        Та розширені (промислові стандарти): LINK, UNLINK, PURGE, COPY, LOCK, UNLOCK
+            тощо
+        А також нестандартні (за потребою) - створені для конкретного API
+            HELO, LOGIN, PASS, QUIT тощо
+    </li> 
+    <li>Заголовки (headers) - дані у формі "ключ: значення; атрибути", які
+        використовуються для характеристики запиту (визначають кодування,
+        компресію(якщо є, наприклад ZIP), мову(локалізацію), кукі, токени і т.і.)
+    </li>
+    <li>Тіло - завершальна частина запиту (після заголовків), яка може 
+        містити довільні дані (текст, бінарні дані довільного формату).
+        Найбільш поширений формат у тілі пакету - JSON
+    </li>
+</ul>
+
+<p>
+    Для роботи з АРІ створюється або фронтенд, або спеціалізовані програми
+    на кшталт Postman
+</p>
+<p>
+    Засоби фронтенд - метод window.fetch (або його похідні у фреймворках
+    $.ajax, HttpClient, http.get), або навпаки, його база - XmlHttpRequest
+</p>
+<p>
+    З боку ASP для створення АРІ використовуються спеціальні контроллери
+    (ApiController, ControllerBase). Головна відмінність від MVC-контроллерів
+    полягає у тому, що в АРІ контроллері одна адреса, а різні методи класу
+    призначені для різних методів запиту (у той час як у MVC - один метод GET, але
+    різні адреси сторінок)<br/>
+    API: GET /address, POST /address, PATCH /address<br />
+    MVC: GET /address/page1,  GET /address/page2,  GET /address/page3
+</p>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col col-4">
+                <button class="btn btn-primary" id="get-button">GET</button>
+                <button class="btn btn-secondary" id="post-button">POST</button>
+                <button class="btn btn-warning" id="put-button">PUT</button>
+                <button class="btn btn-danger" id="link-button">LINK</button>
+            </div>
+            <div class="col col-4">
+                <p id="fetch-result"></p>
+            </div>
+        </div>        
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", ()=>{
+        const getButton = document.getElementById("get-button");
+        if (!getButton) console.error("'get-button' not found");
+        else getButton.addEventListener('click', getButtonClick);
+
+        const postButton = document.getElementById("post-button");
+        if (!postButton) console.error("'post-button' not found");
+        else postButton.addEventListener('click', postButtonClick);
+
+        const putButton = document.getElementById("put-button");
+        if (!putButton) console.error("'put-button' not found");
+        else putButton.addEventListener('click', putButtonClick);
+
+        const linkButton = document.getElementById("link-button");
+        if (!linkButton) console.error("'link-button' not found");
+        else linkButton.addEventListener('click', linkButtonClick);
+    });
+    function getButtonClick() {
+        window.fetch("/api/rates")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("fetch-result").innerHTML =
+                    data.result;
+            });
+    }
+    function postButtonClick() {
+        window.fetch("/api/rates", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ value: "100" })
+        })
+            .then(response => response.json())
+            .then(data => document.getElementById("fetch-result").innerHTML = data.result);
+    }
+    function putButtonClick() {
+        window.fetch("/api/rates", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ value: "200" })
+        })
+            .then(response => response.json())
+            .then(data => document.getElementById("fetch-result").innerHTML = data.result);
+    }
+    function linkButtonClick() {
+        window.fetch("/api/rates", {
+            method: "LINK",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ value: "300" })
+        })
+            .then(response => response.json())
+            .then(data => document.getElementById("fetch-result").innerHTML = data.result);
+    }
+</script>
