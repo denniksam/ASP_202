@@ -33,6 +33,7 @@ namespace ASP_202.Controllers
                 UserCanCreate = HttpContext.User.Identity?.IsAuthenticated == true,
                 Sections = _dataContext.Sections
                     .Include(s => s.Author)
+                    .Include(s => s.RateList)
                     .OrderBy(s => s.CreatedDt)
                     .AsEnumerable()
                     .Select(s => new ForumSectionModel()
@@ -46,7 +47,10 @@ namespace ASP_202.Controllers
                         UrlIdString = s.Id.ToString(),
 
                         AuthorName = s.Author.RealName,
-                        AuthorAvatar = $"/avatars/{s.Author.Avatar}"
+                        AuthorAvatar = $"/avatars/{s.Author.Avatar}",
+
+                        LikesCount = s.RateList.Count(r => r.Rating > 0),
+                        DislikesCount = s.RateList.Count(r => r.Rating < 0),
                     })
                     .ToList(),
             };

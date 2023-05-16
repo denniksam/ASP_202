@@ -11,11 +11,29 @@
                 <p class="card-text">@Model.Description</p>
                 <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
             </div>
-            <div class="card-footer ">
-                Розпочато: @Model.CreatedDtString
-                <img style="max-width:50px; max-height:50px" src="@Model.AuthorAvatar"/> 
-                @Model.AuthorName
-                <a asp-action="Sections" asp-route-id="@Model.UrlIdString" >Переглянути</a>
+            <div class="card-footer d-flex align-items-center">
+                <div class="mx-2 d-flex  align-items-center">
+                    <div class="mx-2">
+                        Розпочато: <br/>
+                        @Model.CreatedDtString
+                    </div>
+                    <img style="max-width:50px; max-height:50px" src="@Model.AuthorAvatar"/> 
+                    @Model.AuthorName
+                </div>
+
+                <span class="u-link-v5 g-color-gray-dark-v4 mx-2" role="button"
+                      data-rate="@Model.UrlIdString" data-rate-value="1">
+                    <i class="bi-hand-thumbs-up g-pos-rel g-top-1 g-mr-3"></i>
+                    @Model.LikesCount
+                </span>
+
+                <span class="u-link-v5 g-color-gray-dark-v4 mx-2" role="button"
+                      data-rate="@Model.UrlIdString" data-rate-value="-1">
+                    <i class="bi-hand-thumbs-down g-pos-rel g-top-1 g-mr-3"></i>
+                    @Model.DislikesCount
+                </span>
+
+                <a class="ms-auto" asp-action="Sections" asp-route-id="@Model.UrlIdString" >Переглянути</a>
             </div>
         </div>
     </div>

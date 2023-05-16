@@ -64,3 +64,35 @@
         </div>
     </div>
 }
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        for( let elem of document.querySelectorAll("[data-rate]")) {
+            elem.addEventListener('click', rateClick);
+        }
+    });
+    function rateClick(e) {
+        const userSidElement = document.querySelector("[data-user-sid]");
+        if(!userSidElement) {
+            // неавтентифікований перегляд
+            alert("Для оцінювання необхідно автентифікуватись");
+            return;
+        }
+        const target = e.target.closest("span");        
+        const data = {
+            "itemId": target.getAttribute("data-rate"),
+            "userId": userSidElement.getAttribute("data-user-sid"),
+            "value":  target.getAttribute("data-rate-value")
+        };
+        console.log(data);
+        fetch("/api/rates", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })  
+        .then(r => r.json())
+        .then(j => console.log(j));
+    }
+</script>
