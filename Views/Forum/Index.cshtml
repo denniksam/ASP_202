@@ -78,15 +78,17 @@
             alert("Для оцінювання необхідно автентифікуватись");
             return;
         }
-        const target = e.target.closest("span");        
+        const target = e.target.closest("span");
+        const isGiven = target.getAttribute("data-rate-given") === "True";
         const data = {
             "itemId": target.getAttribute("data-rate"),
             "userId": userSidElement.getAttribute("data-user-sid"),
             "value":  target.getAttribute("data-rate-value")
         };
+        const apiMethod = isGiven ? "DELETE" : "POST";
         console.log(data);
         fetch("/api/rates", {
-            method: "POST",
+            method: apiMethod,
             headers: {
                 "Content-Type": "application/json"
             },

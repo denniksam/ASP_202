@@ -22,15 +22,36 @@
                 </div>
 
                 <span class="u-link-v5 g-color-gray-dark-v4 mx-2" role="button"
-                      data-rate="@Model.UrlIdString" data-rate-value="1">
-                    <i class="bi-hand-thumbs-up g-pos-rel g-top-1 g-mr-3"></i>
+                      data-rate="@Model.UrlIdString" data-rate-value="1"
+                      data-rate-given="@(Model.GivenRate == 1)">
+                    @if(Model.GivenRate == 1)
+                    {
+                        <i class="bi-hand-thumbs-up-fill"></i>
+                    }
+                    else
+                    {
+                        <i class="bi-hand-thumbs-up"></i>
+                    }
                     @Model.LikesCount
                 </span>
 
                 <span class="u-link-v5 g-color-gray-dark-v4 mx-2" role="button"
-                      data-rate="@Model.UrlIdString" data-rate-value="-1">
-                    <i class="bi-hand-thumbs-down g-pos-rel g-top-1 g-mr-3"></i>
+                      data-rate="@Model.UrlIdString" data-rate-value="-1"
+                      data-rate-given="@(Model.GivenRate == -1)">
+                    @if (Model.GivenRate == -1)
+                    {
+                        <i class="bi-hand-thumbs-down-fill"></i>
+                    }
+                    else
+                    {
+                        <i class="bi-hand-thumbs-down"></i>
+                    }
                     @Model.DislikesCount
+                </span>
+
+                <span class="mx-3">
+                    <i class="bi bi-eyeglasses"></i>
+                    @Model.Sights
                 </span>
 
                 <a class="ms-auto" asp-action="Sections" asp-route-id="@Model.UrlIdString" >Переглянути</a>

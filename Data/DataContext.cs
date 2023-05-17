@@ -13,6 +13,7 @@ namespace ASP_202.Data
         public DbSet<Entity.Post> Posts { get; set; }
 
         public DbSet<Entity.Rate> Rates { get; set; }
+        public DbSet<Entity.Sight> Sights { get; set; }
 
 
         public DataContext(DbContextOptions options) : base(options)

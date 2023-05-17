@@ -1,4 +1,5 @@
 ﻿using ASP_202.Data;
+using ASP_202.Data.Entity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,12 +44,10 @@ namespace ASP_202.Controllers
                     userId = Guid.Parse(data.UserId);
                     value = Convert.ToInt32(data.Value);
 
-                    if(_dataContext.Rates.Any(r => r.ItemId == itemId && r.UserId == userId))
-                    {
-                        HttpContext.Response.StatusCode = StatusCodes.Status406NotAcceptable;
-                        result = $"Дані вже наявні user={data?.UserId} item={data?.ItemId}";
-                    }
-                    else
+                    // шукаємо чи є оцінка з даними параметрами
+                    Rate? rate = _dataContext.Rates
+                        .FirstOrDefault(r => r.ItemId == itemId && r.UserId == userId);
+                    if (rate == null)  // нова оцінка -- створюємо
                     {
                         _dataContext.Rates.Add(new()
                         {
@@ -57,10 +56,21 @@ namespace ASP_202.Controllers
                             Rating = value
                         });
                         _dataContext.SaveChanges();
-
                         HttpContext.Response.StatusCode = StatusCodes.Status201Created;
                         result = $"Дані внесені";
                     }
+                    else if(rate.Rating != value)  // оцінка є, але приходять новий рейтинг (зміна)
+                    {
+                        rate.Rating = value;
+                        _dataContext.SaveChanges();
+                        HttpContext.Response.StatusCode = StatusCodes.Status202Accepted;
+                        result = $"Дані оновлено";
+                    }
+                    else  // оцінка існує з тим самим рейтингом -- ігноруємо
+                    {
+                        HttpContext.Response.StatusCode = StatusCodes.Status406NotAcceptable;
+                        result = $"Дані вже наявні user={data?.UserId} item={data?.ItemId}";
+                    }  
                 }
                 catch
                 {
@@ -75,6 +85,53 @@ namespace ASP_202.Controllers
         public object Put([FromBody] RequestData data)
         {
             return new { result = $"Надійшов запит методом PUT з value={data.Value}" };
+        }
+
+        [HttpDelete]
+        public object Delete([FromBody] RequestData data)
+        {
+            String result = null!;
+            if (data == null
+             || data.ItemId == null
+             || data.Value == null
+             || data.UserId == null)
+            {
+                HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                result = $"Недостатня кількість параметрів: value={data?.Value} user={data?.UserId} item={data?.ItemId}";
+            }
+            else
+            {
+                Guid itemId, userId;
+                int value;
+                try
+                {
+                    itemId = Guid.Parse(data.ItemId);
+                    userId = Guid.Parse(data.UserId);
+                    value = Convert.ToInt32(data.Value);
+
+                    Rate? rate = _dataContext.Rates
+                        .FirstOrDefault(r => r.ItemId == itemId && r.UserId == userId);
+                    if (rate is null)
+                    {
+                        HttpContext.Response.StatusCode = StatusCodes.Status406NotAcceptable;
+                        result = $"Дані відсутні у БД (не можна видалити) user={data?.UserId} item={data?.ItemId}";
+                    }
+                    else
+                    {
+                        _dataContext.Rates.Remove(rate);
+                        _dataContext.SaveChanges();
+
+                        HttpContext.Response.StatusCode = StatusCodes.Status202Accepted;
+                        result = $"Дані видалені";
+                    }
+                }
+                catch
+                {
+                    HttpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    result = $"Параметри не пройшли валідацію: value={data?.Value} user={data?.UserId} item={data?.ItemId}";
+                }
+            }
+            return new { result };
         }
         
         public object Default()

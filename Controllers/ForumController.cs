@@ -1,4 +1,5 @@
 ﻿using ASP_202.Data;
+using ASP_202.Migrations;
 using ASP_202.Models.Forum;
 using ASP_202.Services.Display;
 using ASP_202.Services.Validation;
@@ -27,7 +28,9 @@ namespace ASP_202.Controllers
         private int Counter { get =>  counter++; set { counter = value; } } 
         public IActionResult Index()
         {
-            Counter = 0;                
+            Counter = 0;
+            String? userId = HttpContext.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Sid)?.Value;
             ForumIndexModel model = new()
             {
                 UserCanCreate = HttpContext.User.Identity?.IsAuthenticated == true,
@@ -51,10 +54,16 @@ namespace ASP_202.Controllers
 
                         LikesCount = s.RateList.Count(r => r.Rating > 0),
                         DislikesCount = s.RateList.Count(r => r.Rating < 0),
+                        GivenRate = userId == null ? null
+                            : s.RateList.FirstOrDefault(r => r.UserId == Guid.Parse(userId))?.Rating,
                     })
                     .ToList(),
             };
-
+            foreach(var section in model.Sections)
+            {
+                section.Sights = _dataContext.Sights.AsEnumerable()
+                    .Count(sg => sg.ItemId == Guid.Parse(section.UrlIdString));
+            }
             if (HttpContext.Session.GetString("CreateMessage") is String message)
             {
                 model.CreateMessage = message;
@@ -81,6 +90,16 @@ namespace ASP_202.Controllers
         public ViewResult Sections([FromRoute] String id)
         {
             ViewData["id"] = id;
+
+            _dataContext.Sights.Add(new()
+            {
+                Id     = Guid.NewGuid(),
+                Moment = DateTime.Now,
+                ItemId = Guid.Parse(id),
+                UserId = null
+            });
+            _dataContext.SaveChanges();
+
             ForumSectionsModel model = new()
             {
                 UserCanCreate = HttpContext.User.Identity?.IsAuthenticated == true,
